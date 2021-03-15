@@ -465,6 +465,7 @@ cvar_t* gds_exe;
 cvar_t* game_path;
 cvar_t* reconnect_ip;
 int average_player_level;
+cvar_t* gamedir;
 cvar_t* save_path;
 cvar_t* reconnect_ip;
 cvar_t* vrx_password;

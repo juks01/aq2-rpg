@@ -58,12 +58,10 @@ void closemenu(edict_t* ent)
 //	ent->client->trading = false; // done trading
 }
 
-void JoinTheGame(edict_t* ent)
-{
+void JoinTheGame(edict_t* ent) {
 	int		returned;
 
-	if (ent->client->menustorage.menu_active)
-	{
+	if (ent->client->menustorage.menu_active) {
 		closemenu(ent);
 		return;
 	}
@@ -81,8 +79,7 @@ void JoinTheGame(edict_t* ent)
 		return;
 	case -3:	//above maximum level
 		gi.cprintf(ent, PRINT_HIGH, "You have to be level %d or below to play here.\n", ((int)max_level->value));
-		if (strcmp(reconnect_ip->string, "0") != 0)
-		{
+		if (strcmp(reconnect_ip->string, "0") != 0) {
 			gi.cprintf(ent, PRINT_HIGH, "You are being sent to an alternate server where you can play.\n");
 			stuffcmd(ent, va("connect %s\n", reconnect_ip->string));
 		}
@@ -106,43 +103,38 @@ void JoinTheGame(edict_t* ent)
 	default:	//passed every check
 		break;
 	}
-/*
-	if (ptr->value)
-	{
+
+/* Disabled for now -JukS (15.03.2021)
+	if (ptr->value) {
 		OpenPTRJoinMenu(ent);
 		return;
 	}
 
-	if (domination->value)
-	{
+	if (domination->value) {
 		OpenDOMJoinMenu(ent);
 		return;
 	}
-*/
-	/* Disabled for now -JukS (15.03.2021)
-	if (ctf->value)
-	{
+
+	if (ctf->value) {
 		CTF_OpenJoinMenu(ent);
 		return;
 	}
 
-	if (ent->myskills.class_num == 0)
-	{
+	if (ent->myskills.class_num == 0) {
 		OpenClassMenu(ent, 1); //GHz
 		return;
 	}
-	*/
+*/
+
 	StartGame(ent);
 
-	/*
-	if (ent->myskills.inuse)
-	{
+	if (ent->myskills.inuse) {
 		gi.cprintf(ent, PRINT_HIGH, "WARNING: Your character file is marked as already being open!\n");
 		gi.cprintf(ent, PRINT_HIGH, "Logging into a server twice is not permitted. A message will be sent to an administrator.\n");
-		//gi.dprintf("WARNING: %s's file is marked as already open at %s on %s.\n", ent->client->pers.netname, CURRENT_TIME, CURRENT_DATE);
+//		gi.dprintf("WARNING: %s's file is marked as already open at %s on %s.\n", ent->client->pers.netname, CURRENT_TIME, CURRENT_DATE);
 	}
 	ent->myskills.inuse = 1;
-	*/
+
 }
 
 /*
@@ -250,5 +242,7 @@ void StartGame(edict_t* ent)
 	gi.sound(ent, CHAN_VOICE, gi.soundindex("misc/startup.wav"), 1, ATTN_NORM, 0);
 	WriteToLogfile(ent, "Logged in.\n");
 
-	savePlayer(ent);
+	// LOAD PLAYER HERE -JukS (15.03.2021)
+	openPlayer(ent);
+	// end -JukS
 }

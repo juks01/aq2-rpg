@@ -309,6 +309,12 @@ void Cmd_Stats_f (edict_t *targetent, char *arg)
 	gi.cprintf (targetent, PRINT_HIGH, "Average Accuracy:                         %.2f\n", perc_hit); // Average
 	gi.cprintf (targetent, PRINT_HIGH, "\nžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n\n");
 	gi.cprintf(targetent, PRINT_HIGH, "Highest streaks:  kills: %d headshots: %d\n", ent->client->resp.streakKillsHighest, ent->client->resp.streakHSHighest);
+
+// for saved player info -JukS (15.03.2021)
+	gi.cprintf(targetent, PRINT_HIGH, "\nžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n\n");
+	gi.cprintf(targetent, PRINT_HIGH, "Total: score: %d - kills: %d deaths: %d\n", ent->client->resp.totalscore, ent->client->resp.totalkills, ent->client->resp.totaldeaths);
+
+// end -JukS
 }
 
 void A_ScoreboardEndLevel (edict_t * ent, edict_t * killer)

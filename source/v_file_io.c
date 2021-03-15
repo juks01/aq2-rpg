@@ -175,30 +175,31 @@ char *CryptPassword(char *text)
 //***********************************************************************
 //	Load player v 1.0
 //***********************************************************************
-qboolean ReadPlayer_v1(FILE * fRead, edict_t *player)
-{
-	int numAbilities, numWeapons, numRunes;
-	int i;
+qboolean ReadPlayer_v1(FILE * fRead, edict_t *player) {
+//	int numAbilities, numWeapons, numRunes;
+//	int i;
 
-	//player's title
-    ReadString(player->myskills.title, fRead);	
-	//player's in-game name
-	ReadString(player->myskills.player_name, fRead);
-	//password
-	ReadString(player->myskills.password, fRead);
-	//email address
-	ReadString(player->myskills.email, fRead);
-	//owner
-	ReadString(player->myskills.owner, fRead);
-	//creation date
-	ReadString(player->myskills.member_since, fRead);
-	//last played date
-	ReadString(player->myskills.last_played, fRead);
-	//playing time total
-	player->myskills.total_playtime =  ReadInteger(fRead);
-	//playing time today
-	player->myskills.playingtime =  ReadInteger(fRead);
+    ReadString(player->myskills.title, fRead);					//player's title
+	ReadString(player->myskills.player_name, fRead);			//player's in-game name
+	ReadString(player->myskills.password, fRead);				//password
+	ReadString(player->myskills.email, fRead);					//email address
+	ReadString(player->myskills.owner, fRead);					//owner
+	ReadString(player->myskills.member_since, fRead);			//creation date
+	ReadString(player->myskills.last_played, fRead);			//last played date
+	player->myskills.total_playtime =  ReadInteger(fRead);		//playing time total
+	player->myskills.playingtime =  ReadInteger(fRead);			//playing time today
 
+	// For AQ2 stats -JukS (15.03.2021)
+	player->client->resp.totalscore = ReadInteger(fRead);
+	player->client->resp.totalkills = ReadInteger(fRead);
+	player->client->resp.totaldeaths = ReadInteger(fRead);
+	//	player->client->resp.totalctf_caps);
+	// end -JukS
+
+
+
+// ---------------- From Vortex. For later use? -JukS (15.03.2021) ==============================
+/*
     //begin talents
 	player->myskills.talents.count = ReadInteger(fRead);
 	for (i = 0; i < player->myskills.talents.count; ++i)
@@ -401,6 +402,8 @@ qboolean ReadPlayer_v1(FILE * fRead, edict_t *player)
 //	player->myskills.inventory[body_armor_index] = player->myskills.current_armor;
 
 	//done
+// ---------------- END: From Vortex. For later use? -JukS (15.03.2021) ==============================
+*/
 	return true;
 }
 
@@ -409,32 +412,32 @@ qboolean ReadPlayer_v1(FILE * fRead, edict_t *player)
 //***********************************************************************
 void WritePlayer_v1(FILE * fWrite, char *playername, edict_t *player)
 {
-	int i;
-	int numAbilities = CountAbilities(player);
-	int numWeapons = CountWeapons(player);
-	int numRunes = CountRunes(player);
+//	int i;
+//	int numAbilities = CountAbilities(player);
+//	int numWeapons = CountWeapons(player);
+//	int numRunes = CountRunes(player);
 
 	//save header
-	WriteString(fWrite, "Vortex Player File v1.0");
-	//player's title
-	WriteString(fWrite, player->myskills.title);
-	//player's in-game name
+	WriteString(fWrite, "ActionRPG Player File v1.0");			//player's title
+	WriteString(fWrite, player->myskills.title);				//player's in-game name
 	WriteString(fWrite, playername);
-	//password
-	WriteString(fWrite, player->myskills.password);
-	//email address
-	WriteString(fWrite, player->myskills.email);
-	//owner
-	WriteString(fWrite, player->myskills.owner);
-	//creation date
-	WriteString(fWrite, player->myskills.member_since);
-	//last played date
-	WriteString(fWrite, player->myskills.last_played);
-	//playing time total
-	WriteInteger(fWrite, player->myskills.total_playtime);
-	//playing time today
-	WriteInteger(fWrite, player->myskills.playingtime);
+	WriteString(fWrite, player->myskills.password);				//password
+	WriteString(fWrite, player->myskills.email);				//email address
+	WriteString(fWrite, player->myskills.owner);				//owner
+	WriteString(fWrite, player->myskills.member_since);			//creation date
+	WriteString(fWrite, player->myskills.last_played);			//last played date
+	WriteInteger(fWrite, player->myskills.total_playtime);		//playing time total
+	WriteInteger(fWrite, player->myskills.playingtime);			//playing time today
 
+	// For AQ2 stats -JukS (15.03.2021)
+	WriteInteger(fWrite, player->client->resp.totalscore);
+	WriteInteger(fWrite, player->client->resp.totalkills);
+	WriteInteger(fWrite, player->client->resp.totaldeaths);
+//	WriteInteger(fWrite, player->client->resp.totalctf_caps);
+	// end -JukS
+
+// ---------------- From Vortex. For later use? -JukS (15.03.2021) ==============================
+/*
 	//begin talents
 	WriteInteger(fWrite, player->myskills.talents.count);
 	for (i = 0; i < player->myskills.talents.count; ++i)
@@ -598,13 +601,15 @@ void WritePlayer_v1(FILE * fWrite, char *playername, edict_t *player)
 	WriteInteger(fWrite, player->myskills.defense_kills);
 	WriteInteger(fWrite, player->myskills.assists);
 	//End CTF
-/* No need in AQ2 -JukS (15.03.2021)
-	//Don't let the player have > max cubes
-	if (player->client->pers.inventory[power_cube_index] > player->client->pers.max_powercubes)
-		player->client->pers.inventory[power_cube_index] = player->client->pers.max_powercubes;
-*/
+// No need in AQ2 -JukS (15.03.2021)
+//	//Don't let the player have > max cubes
+//	if (player->client->pers.inventory[power_cube_index] > player->client->pers.max_powercubes)
+//		player->client->pers.inventory[power_cube_index] = player->client->pers.max_powercubes;
+
 	//standard iD inventory
 	fwrite(player->client->pers.inventory, sizeof(int), MAX_ITEMS, fWrite);
+// ---------------- END: From Vortex. For later use? -JukS (15.03.2021) ==============================
+*/
 }
 
 //***********************************************************************
@@ -797,7 +802,7 @@ qboolean SavePlayer(edict_t *ent)
 		gi.dprintf("savePlayer called to save: %s\n", ent->client->pers.netname);
 
 	//determine path
-		Com_sprintf(path, sizeof path, "%s/%s.vrx", save_path->string, V_FormatFileName(ent->client->pers.netname));
+		Com_sprintf(path, sizeof path, "%s/%s.dat", save_path->string, V_FormatFileName(ent->client->pers.netname));
 
 	//Open file for saving
 	if ((fwrite = fopen(path, "wb")) == NULL)
@@ -819,12 +824,12 @@ qboolean SavePlayer(edict_t *ent)
 //***********************************************************************
 
 qboolean savePlayer(edict_t *ent) {
-	if(gds->value) {
-		//Don't create more than one save thread.
-		if(!ent->isSaving)
-			createSavePlayerThread(ent);
-		return true;
-	}
+//	if(gds->value) {
+//		//Don't create more than one save thread.
+//		if(!ent->isSaving)
+//			createSavePlayerThread(ent);
+//		return true;
+//	}
 	return SavePlayer(ent);
 }
 
@@ -832,64 +837,45 @@ qboolean savePlayer(edict_t *ent) {
 //		open player from file
 //***********************************************************************
 
-qboolean openPlayer(edict_t *ent)
-{
+qboolean openPlayer(edict_t *ent) {
 	char	path[100];
 	FILE	*fread;
 	int		i;
 	char	version[64];
 
-	//Make sure this is a client
-	if (!ent->client)
-	{
+
+	if (!ent->client) {		//Make sure this is a client
 		gi.dprintf("ERROR: entity not a client!! (%s)\n",ent->classname);
 		return false;
 	}
 
 //	if(debuginfo->value)
 		gi.dprintf("openPlayer called to open: %s\n", ent->client->pers.netname);
+	
+	memset(&ent->myskills,0,sizeof(skills_t));		//Reset the player's skills_t
+	Com_sprintf(path, sizeof path, "%s/%s.dat", save_path->string, V_FormatFileName(ent->client->pers.netname));	//determine path
 
-	//Reset the player's skills_t
-	memset(&ent->myskills,0,sizeof(skills_t));
-
-	//determine path
-		Com_sprintf(path, sizeof path, "%s/%s.vrx", save_path->string, V_FormatFileName(ent->client->pers.netname));
-
-	//Open file for loading
-	if ((fread = fopen(path, "rb")) == NULL)
-	{
+	
+	if ((fread = fopen(path, "rb")) == NULL) {		//Open file for loading
 		gi.dprintf("INFO: openPlayer can't open %s. This probably means the file does not exist.\n", path);
 		return false;		
 	}	
 
-	//disable all abilities
-	for (i = 0; i < MAX_ABILITIES; ++i)
-	{
+	
+	for (i = 0; i < MAX_ABILITIES; ++i) {			//disable all abilities
 		ent->myskills.abilities[i].disable = true;
 	}
 
-	//read header (player file version number)
-	ReadString(version, fread);
+	ReadString(version, fread);						//read header (player file version number)
 
 	//check for correct version number
-	if (Q_stricmp(version + 19, "v1.0") == 0)	//"Vortex Player File " is 19 chars long, start comparison at the end
-	{
-		//begin reading player, if there was an error, return false :)
-		if (ReadPlayer_v1(fread, ent) == false)
-		{
+	if (Q_stricmp(version + 19, "v1.0") == 0) {		//"Vortex Player File " is 19 chars long, start comparison at the end
+		if (ReadPlayer_v1(fread, ent) == false) {		//begin reading player, if there was an error, return false :)
 			fclose(fread);
 			return false;
 		}
-
-		/*		"Old file" update code, not needed any more.
-		//Log the fact the player file has been updated
-		gi.dprintf("*** Older player file loaded: %s (v0.10) ***\n*** Updating the file to %s ***\n", path, SAVE_VERSION);
-		savePlayer(ent);
-		WriteToLogfile(ent, va("INFO: Updated player file from v0.10 to %s", SAVE_VERSION));
-		*/
 	}
-	else //<-- put newer loading code here
-	{
+	else { // <-- put newer loading code here
 		//bad file version/type
 		fclose(fread);
 		return false;

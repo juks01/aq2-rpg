@@ -358,6 +358,7 @@ void Add_Frag(edict_t * ent, int mod)
 	if (teamplay->value && teamdm->value != 2)
 	{
 		ent->client->resp.score++;	// just 1 normal kill
+		ent->client->resp.totalscore++;	// just 1 normal kill - also for totalscore -JukS (15.03.2021)
 
 		if (IS_ALIVE(ent))
 		{
@@ -455,7 +456,9 @@ void Subtract_Frag(edict_t * ent)
 		return;
 
 	ent->client->resp.kills--;
+	ent->client->resp.totalkills--;		// for saving player info -JukS (15.03.2021)
 	ent->client->resp.score--;
+	ent->client->resp.totalscore--;		// for saving player info -JukS (15.03.2021)
 	ent->client->resp.streakKills = 0;
 	if(teamdm->value)
 		teams[ent->client->resp.team].score--;
@@ -466,7 +469,8 @@ void Add_Death( edict_t *ent, qboolean end_streak )
 	if( in_warmup )
 		return;
 
-	ent->client->resp.deaths ++;
+	ent->client->resp.deaths++;
+	ent->client->resp.totaldeaths++;	// for saving player info -JukS (15.03.2021)
 	if( end_streak )
 		ent->client->resp.streakKills = 0;
 }
@@ -2243,8 +2247,8 @@ void PutClientInServer(edict_t * ent)
 	client->curr_weap = client->weapon->typeNum;
 
 
-	ent->health = 100;
-	ent->max_health = 100;
+	ent->health = MAX_HEALTH(ent);			// TODO: Confirm this works -JukS (15.03.2021)
+	ent->max_health = MAX_HEALTH(ent);		// TODO: Confirm this works -JukS (15.03.2021)
 	
 	client->max_pistolmags = 2;
 	client->max_shells = 14;
@@ -2383,6 +2387,8 @@ void PutClientInServer(edict_t * ent)
 	// force the current weapon up
 	client->newweapon = client->weapon;
 	ChangeWeapon(ent);
+
+	openPlayer(ent);
 }
 
 /*
@@ -2685,6 +2691,8 @@ void ClientDisconnect(edict_t * ent)
 	if (!ent->client)
 		return;
 
+	savePlayer(ent); // Save player info on disconnect -JukS (15.03.2021)
+
 	MM_LeftTeam( ent );
 	ent->client->resp.team = 0;
 
@@ -2700,8 +2708,7 @@ void ClientDisconnect(edict_t * ent)
 	gi.bprintf(PRINT_HIGH, "%s disconnected\n", ent->client->pers.netname);
 	IRC_printf(IRC_T_SERVER, "%n disconnected", ent->client->pers.netname);
 
-	if( !teamplay->value && !ent->client->pers.spectator )
-	{
+	if( !teamplay->value && !ent->client->pers.spectator ) {
 		// send effect
 		gi.WriteByte( svc_muzzleflash );
 		gi.WriteShort( ent - g_edicts );
@@ -3273,7 +3280,7 @@ void InitClientPersistant(gclient_t* client)
 	memset(&client->pers, 0, sizeof(client->pers));
 
 	//K03 Begin
-	item = FindItem("Blaster");
+	item = FindItem("Blaster");						// TODO: AQ2 items, plz -JukS (15.03.2021)
 	client->pers.selected_item = ITEM_INDEX(item);
 	client->pers.inventory[ITEM_INDEX(item)] = 1;
 	client->pers.inventory[ITEM_INDEX(FindItem("Sword"))] = 1;

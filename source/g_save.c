@@ -381,6 +381,12 @@ void InitGame( void )
 		gi.dprintf( "No maps were read from the config file, \"actionmaps\" won't be used.\n" );
 		gi.cvar_forceset( "actionmaps", "0" );
 	}
+	// for saving player info -JukS (15.03.2021)
+	game_path = gi.cvar("gamedir", "", CVAR_SERVERINFO);
+	save_path = gi.cvar("save_path", va("%s\\characters", game_path->string), CVAR_LATCH);
+	// end -JukS
+
+
 	nohud = gi.cvar( "nohud", "0", CVAR_LATCH );
 	hud_team_icon = gi.cvar( "hud_team_icon", "0", 0 );
 	hud_items_cycle = gi.cvar( "hud_items_cycle", "20", 0 );

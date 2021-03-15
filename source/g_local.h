@@ -1560,6 +1560,13 @@ typedef struct
 
   int damage_dealt;		// keep track of damage dealt by player to other players
 
+  // for saving player info -JukS (15.03.2021)
+  int totalscore;			// frags, etc
+  int totalkills;			// total real kills
+  int totaldeaths;			// total deaths
+  int totaldamage_dealt;	// keep track of total damage dealt by player to other players
+  int totalctf_caps;		// total CTF flag captures
+
   int team;			// team the player is on
   int subteam;
 
