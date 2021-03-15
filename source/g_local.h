@@ -287,6 +287,12 @@
 #include	"tng_irc.h"
 #include	"tng_balancer.h"
 #include	"g_grapple.h"
+
+// Added by JukS (14.03.2021)
+#include	"gds.h"
+#include	"talents.h"
+// end -JukS
+
 #define		getEnt(entnum)	(edict_t *)((char *)globals.edicts + (globals.edict_size * entnum))	//AQ:TNG Slicer - This was missing
 #define		GAMEVERSION			"arpg"	// the "gameversion" client command will print this plus compile date
 
@@ -512,6 +518,15 @@ typedef enum
 }
 movetype_t;
 
+// Added by JukS (14.03.2021)
+//4.0 (multithreading support)
+unsigned long	hThread;			//Used for Windows multi-threading
+qboolean		hThreadFinishTime;	//Records when the thread finished execution
+qboolean		isSaving;
+qboolean		isLoading;
+int				threadReturnVal;
+extern int average_player_level;
+// End -JukS
 
 
 typedef struct
@@ -661,6 +676,23 @@ extern itemList_t items[ITEM_MAX_NUM];
 #define GRENADE_DAMRAD_CLASSIC  170
 #define GRENADE_DAMRAD          250
 
+// ------------------------------------
+// for player saving -JukS (14.03.2021)
+#define MAX_HEALTH(ent)		100
+#define MAX_ARMOR(ent)		100
+#define MAX_VRXITEMS			10
+#define MAX_VRXITEMMODS			6
+int total_players(void);
+
+typedef struct imodifier_s
+{
+	int type;		//see above
+	int index;		//Tells us which weapon or ability it is..
+	int value;
+	int set;		//how many set items needed to see this modifier
+}imodifier_t;
+
+// end -JukS
 
 typedef struct gitem_s
 {
@@ -686,6 +718,18 @@ typedef struct gitem_s
   int tag;
   char *precaches;		// string of all models, sounds, and images this item will use
   int typeNum;
+// for saving player info -JukS (15.03.2021)
+  int				itemtype;		//See defined item types
+  int				itemLevel;		//lvl required to equip the item
+  int				untradeable;	//Can this item be traded to someone else?
+  int				numMods;		//number of modifiers
+  int				setCode;		//Used for set items
+  int				classNum;		//Used for class-specific runes
+  char				id[16];			//item's id string
+  char				name[24];		//custom name for the item
+  imodifier_t		modifiers[MAX_VRXITEMMODS];	//Up to 6 seperate mods
+
+// end -JukS
 }
 gitem_t;
 
@@ -859,6 +903,16 @@ extern game_export_t globals;
 extern spawn_temp_t st;
 
 extern int sm_meat_index;
+
+
+// for saving player info -JukS (14.03.2021)
+#include	"g_abilities.h"
+skills_t myskills;
+
+const char* Date(void);
+const char* Time(void);
+// end -JukS
+
 
 // means of death
 #define MOD_UNKNOWN                     0
@@ -1101,6 +1155,13 @@ extern cvar_t *bholelimit;
 extern cvar_t *splatlife;
 extern cvar_t *bholelife;
 
+// for gds -JukS (14.03.2021)
+extern cvar_t* gds;
+extern cvar_t* reconnect_ip;
+extern cvar_t* game_path;
+extern cvar_t* save_path;
+// end -JukS
+
 #define world   (&g_edicts[0])
 
 // item spawnflags
@@ -1202,6 +1263,7 @@ void	G_TouchSolids(edict_t *ent);
 size_t  G_HighlightStr(char *dst, const char *src, size_t size);
 
 char	*G_CopyString(char *in);
+qboolean G_IsSpectator(edict_t* ent);	// for file_output.c -JukS (14.03.2021)
 qboolean visible(edict_t *self, edict_t *other, int mask);
 
 // Re-enabled for bots
@@ -1280,6 +1342,13 @@ void BeginIntermission (edict_t * targ);
 void PutClientInServer (edict_t * ent);
 void InitBodyQue (void);
 void ClientBeginServerFrame (edict_t * ent);
+// for file_output -JukS (14.03.2021)
+extern cvar_t* start_level;
+extern cvar_t* start_nextlevel;
+#define MAX_AMMO		12
+void InitClientPersistant(gclient_t* client);
+void InitClientResp(gclient_t* client);
+// end -JukS
 
 //
 // g_player.c
@@ -1371,6 +1440,7 @@ void InitTookDamage(void);
 void ProduceShotgunDamageReport(edict_t*);
 
 
+
 //============================================================================
 
 // client_t->anim_priority
@@ -1450,6 +1520,26 @@ typedef struct
 	int irvision;			// ir on or off (only matters if player has ir device, currently bandolier)
 
 	ignorelist_t ignorelist;
+
+	// for file_output.c -JukS (14.03.2021)
+	int			combat_changed;		// changed combat preferences
+	// values saved and restored from edicts when changing levels
+	int			health;
+	int			max_health;
+	// ammo capacities
+	int			max_bullets;
+	int			max_shells;
+	int			max_rockets;
+	int			max_grenades;
+	int			max_cells;
+	int			max_slugs;
+
+	int			selected_item;
+	int			inventory[MAX_ITEMS];
+
+	gitem_t* weapon;
+	gitem_t* lastweapon;
+	// end -JukS
 }
 client_persistant_t;
 
@@ -1529,6 +1619,10 @@ typedef struct
 
   int				penalty;
   //char skin[MAX_SKINLEN];
+
+  // added for file_output -JukS (14.03.2021)
+  qboolean	spectator;			// client is a spectator 
+  // end -JukS
 }
 client_respawn_t;
 
@@ -1549,7 +1643,8 @@ struct gclient_s
 	pmove_state_t		old_pmove;	// for detecting out-of-pmove changes
 
 	layout_t	layout;		// set layout stat
-	qboolean	showinventory;	// set layout stat
+	qboolean	showinventory;		// set layout stat
+	qboolean	showscores;			// set layout stat
 
 	pmenuhnd_t	menu;		// current menu
 
@@ -1715,10 +1810,35 @@ struct gclient_s
 	edict_t		*lasersight; // laser
 	edict_t		*flashlight; // Flashlight
 
-	edict_t		*ctf_grapple;		// entity of grapple
-	int			ctf_grapplestate;		// true if pulling
+	edict_t		*ctf_grapple;				// entity of grapple
+	int			ctf_grapplestate;			// true if pulling
 	int			ctf_grapplereleaseframe;	// frame of grapple release
+
+	// for talents.c -JukS (14.03.2021)
+	edict_t* menutarget;			// ent stats we are viewing with menu (ent->other is just for clients)
+	menusystem_t	menustorage;	// stores menu data
+
 };
+
+
+// ------------------------------------------------------------------
+// for saving player info -JukS (14.03.2021)
+#define MAX_VRXITEMS			10
+#define MAX_VRXITEMMODS			6
+typedef struct item_s
+{
+	int				itemtype;		//See defined item types
+	int				itemLevel;		//lvl required to equip the item
+	int				quantity;		//1 for runes, > 1 for other items
+	int				untradeable;	//Can this item be traded to someone else?
+	char			id[16];			//item's id string
+	char			name[24];		//custom name for the item
+	int				numMods;		//number of modifiers
+	int				setCode;		//Used for set items
+	int				classNum;		//Used for class-specific runes
+	imodifier_t		modifiers[MAX_VRXITEMMODS];	//Up to 6 seperate mods
+}item_t;
+// end -JukS
 
 
 struct edict_s
@@ -1872,6 +1992,28 @@ struct edict_s
 	qboolean	splatted;
 	int			classnum;
 	int			typeNum;
+
+// Added by JukS (14.03.2021)
+	skills_t myskills;
+	#define MAX_HOURS					24					//Maximum playing time per day (hours)
+	#define	CURRENT_DATE				s1 = Date()
+	#define CURRENT_TIME				s2 = Time()
+	#define NEWBIE_BASHER_MAX 3 * AveragePlayerLevel()	//maximum level a newbie basher can be
+	#define MAX_ABILITIES	107
+	#define MAX_WEAPONS				13
+	#define MAX_WEAPONMODS			5
+	#define MAX_VRXITEMS			10
+	#define MAX_VRXITEMMODS			6
+
+// end -JukS
+
+	//4.0 (multithreading support)
+	unsigned long	hThread;			//Used for Windows multi-threading
+	qboolean		hThreadFinishTime;	//Records when the thread finished execution
+	qboolean		isSaving;
+	qboolean		isLoading;
+	int				threadReturnVal;
+// End -JukS
 };
 
 typedef struct
@@ -2018,3 +2160,35 @@ extern int gameSettings;
 
 #include "a_ctf.h"
 #include "a_dom.h"
+
+// Added by JukS (14.03.2021)
+
+//********** v_file_IO.c **********
+char* CryptPassword(char* text);
+qboolean savePlayer(edict_t* ent);
+qboolean openPlayer(edict_t* ent);
+void createOpenPlayerThread(edict_t* ent);
+//********** v_file_IO.c **********
+
+//************ player.c ************
+void newPlayer(edict_t* ent);
+int canJoinGame(edict_t* ent);
+//************ player.c ************
+
+void modify_max(edict_t* ent);
+void modify_health(edict_t* ent);
+void SaveCharacter(edict_t* ent);
+
+void WriteToLogfile(edict_t* ent, char* s);
+void WriteToLogFile(char* char_name, char* s);
+void JoinTheGame(edict_t* ent);
+int OpenConfigFile(edict_t* ent);
+void OpenJoinMenu(edict_t* ent);
+qboolean ShowMenu(edict_t* ent);
+qboolean InMenu(edict_t* ent, int index, void (*optionselected)(edict_t* ent, int option));
+
+extern cvar_t* min_level;
+extern cvar_t* max_level;
+// End -JukS
+
+

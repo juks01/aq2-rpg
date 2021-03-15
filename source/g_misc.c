@@ -1695,3 +1695,42 @@ SP_misc_teleporter_dest (edict_t * ent)
 
   gi.linkentity (ent);
 }
+
+// ---------------------------------------------------------
+// For saving player info -JukS (14.03.2021)
+
+int AveragePlayerLevel(void)
+{
+    edict_t* player;
+    int players = 0, levels = 0, average, i;
+
+    for (i = 1; i <= maxclients->value; i++) {
+        player = &g_edicts[i];
+
+        if (!player->inuse)
+            continue;
+        if (G_IsSpectator(player))
+            continue;
+        if (player->myskills.boss)
+            continue;
+        players++;
+        levels += player->myskills.level;
+        //	gi.dprintf("%s level %d added, total %d\n", player->client->pers.netname,
+        //		player->myskills.level, players);
+    }
+
+    if (players < 1)
+        return 0;
+    if (levels < 1)
+        levels = 1;
+
+    average = levels / players;
+
+    if (average < 1)
+        average = 1;
+
+ //   if (debuginfo->value)
+        gi.dprintf("DEBUG: Average player level %d\n", average);
+    return average;
+}
+// end -JukS

@@ -680,3 +680,69 @@ qboolean visible(edict_t *self, edict_t *other, int mask)
 
 	return false;
 }
+
+// -----------------------------------------------------
+// for player saving -JukS (14.03.2021)
+char* CryptString(char* text, qboolean decrypt)
+{
+	int i;
+
+	if (!text)
+		return NULL;
+
+	for (i = 0; i < (int)strlen(text); i++)
+		if (decrypt)
+		{
+			if ((byte)text[i] > 127)
+				text[i] = (byte)text[i] - 128;
+		}
+		else if ((byte)text[i] < 128)
+		{
+			text[i] = (byte)text[i] + 128;
+		}
+
+	return text;
+}
+
+const char* Date()
+{
+	static char buf[100];
+	time_t now;
+	struct tm* ltime;
+
+	now = time(NULL);
+	ltime = localtime(&now);
+	strftime(buf, 100, "%x", ltime);
+	return buf;
+}
+
+const char* Time()
+{
+	static char buf[100];
+	time_t now;
+	struct tm* ltime;
+
+	now = time(NULL);
+	ltime = localtime(&now);
+	strftime(buf, 100, "%X", ltime);
+	return buf;
+}
+// end -JukS
+
+// ---------------------------------------------------------
+// For file_output.c -JukS (14.03.2021)
+qboolean G_IsSpectator(edict_t* ent)
+{
+	if (!ent->client)
+		return false;
+
+	if (ent->client->pers.spectator || ent->client->resp.spectator)
+		return true;
+	if ((ent->movetype == MOVETYPE_NOCLIP)
+		&& !(ent->owner && ent->owner->inuse))//3.9 added player-monster exception
+//		&& !(ent->flags & FL_WORMHOLE))//4.2 added wormhole exception
+		return true;
+
+	return false;
+}
+// end -JukS

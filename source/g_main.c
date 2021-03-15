@@ -456,6 +456,24 @@ cvar_t *warmup;
 cvar_t *round_begin;
 cvar_t *spectator_hud;
 
+// For saving player info -JukS (14.03.2021)
+cvar_t* debuginfo;		
+cvar_t* gds;
+cvar_t* gds;
+cvar_t* gds_path;
+cvar_t* gds_exe;
+cvar_t* game_path;
+cvar_t* reconnect_ip;
+int average_player_level;
+cvar_t* save_path;
+cvar_t* reconnect_ip;
+cvar_t* vrx_password;
+cvar_t* min_level;
+cvar_t* max_level;
+cvar_t* start_level;
+cvar_t* start_nextlevel;
+// end -JukS
+
 void SpawnEntities (char *mapname, char *entities, char *spawnpoint);
 void ClientThink (edict_t * ent, usercmd_t * cmd);
 qboolean ClientConnect (edict_t * ent, char *userinfo);

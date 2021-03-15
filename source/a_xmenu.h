@@ -18,6 +18,50 @@
 #define XMENU_END_ENTRY XMENU_MAX_ENTRIES+12
 #define XMENU_TITLE_MAX 30
 
+// ----------------------------------------------------------------------
+// For talents.c -JukS (14.03.2021)
+#define MENU_WHITE_CENTERED		20001
+#define	MENU_GREEN_CENTERED		20002
+#define MENU_GREEN_RIGHT		20003
+#define MENU_GREEN_LEFT			20004
+
+#define MAX_LINES				21	// Lines per menu.
+#define MENU_MAX_LINE_LEN		28	// Limit 27 chars in menu line.
+
+void addlinetomenu(edict_t* ent, char* line, int option);
+void clearmenu(edict_t* ent);
+void setmenuhandler(edict_t* ent, void (*optionselected)(edict_t* ent, int option));
+void ClearAllMenus(void);
+
+void menuup(edict_t* ent);
+void menudown(edict_t* ent);
+void menuselect(edict_t* ent);
+
+void initmenu(edict_t* ent);
+void showmenu(edict_t* ent);
+void closemenu(edict_t* ent);
+
+typedef struct menumsg_s
+{
+	char* msg;
+	int		option;
+} menumsg_t;
+
+typedef struct menusystem_s
+{
+	void 		(*optionselected)(edict_t* ent, int option);
+	void		(*oldmenuhandler)(edict_t* ent, int option);
+	qboolean 	menu_active;
+	qboolean	displaymsg;
+	int			oldline;
+	menumsg_t	messages[MAX_LINES * MENU_MAX_LINE_LEN];
+	int 		currentline;
+	int			num_of_lines;
+	int			menu_index;
+} menusystem_t;
+// ----------------------------------------------------------------------
+// End -JukS
+
 typedef char XMENU_TITLE[XMENU_TITLE_MAX];
 
 typedef struct

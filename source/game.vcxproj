@@ -137,6 +137,8 @@
     <ClCompile Include="a_xmenu.c" />
     <ClCompile Include="a_xvote.c" />
     <ClCompile Include="cgf_sfx_glass.c" />
+    <ClCompile Include="file_output.c" />
+    <ClCompile Include="gds.c" />
     <ClCompile Include="g_chase.c" />
     <ClCompile Include="g_cmds.c" />
     <ClCompile Include="g_combat.c" />
@@ -154,16 +156,21 @@
     <ClCompile Include="g_utils.c" />
     <ClCompile Include="g_weapon.c" />
     <ClCompile Include="lcchack.c" />
+    <ClCompile Include="misc_stuff.c" />
+    <ClCompile Include="player.c" />
     <ClCompile Include="p_client.c" />
     <ClCompile Include="p_hud.c" />
+    <ClCompile Include="p_menu.c" />
     <ClCompile Include="p_view.c" />
     <ClCompile Include="p_weapon.c" />
     <ClCompile Include="q_shared.c" />
+    <ClCompile Include="talents.c" />
     <ClCompile Include="tng_balancer.c" />
     <ClCompile Include="tng_flashlight.c" />
     <ClCompile Include="tng_ini.c" />
     <ClCompile Include="tng_irc.c" />
     <ClCompile Include="tng_stats.c" />
+    <ClCompile Include="v_file_io.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="a_ctf.h" />
@@ -180,11 +187,14 @@
     <ClInclude Include="a_xmenu.h" />
     <ClInclude Include="a_xvote.h" />
     <ClInclude Include="cgf_sfx_glass.h" />
+    <ClInclude Include="gds.h" />
+    <ClInclude Include="g_abilities.h" />
     <ClInclude Include="g_grapple.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="m_player.h" />
     <ClInclude Include="q_shared.h" />
+    <ClInclude Include="talents.h" />
     <ClInclude Include="tng_balancer.h" />
     <ClInclude Include="tng_ini.h" />
     <ClInclude Include="tng_irc.h" />

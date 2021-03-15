@@ -147,6 +147,27 @@
     <ClCompile Include="a_dom.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="file_output.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gds.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="v_file_io.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="player.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="talents.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="misc_stuff.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="p_menu.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="a_ctf.h">
@@ -216,6 +237,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="a_dom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="g_abilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="talents.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

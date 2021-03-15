@@ -3251,3 +3251,50 @@ void ClientBeginServerFrame(edict_t * ent)
 	if (!in_warmup || ent->movetype != MOVETYPE_NOCLIP)
 		client->latched_buttons = 0;
 }
+
+// ---------------------------------------
+// For file_output.c -JukS (14.03.2021)
+void InitClientPersistant(gclient_t* client)
+{
+	int saved;
+	//K03 Begin
+	gitem_t* item;
+
+	int spectator = client->pers.spectator;
+
+//	if (debuginfo->value > 1)
+		gi.dprintf("InitClientPersistant()\n");
+
+	// 4.5 - latest client combat preferences, don't clear this!
+	saved = client->pers.combat_changed;
+
+	//K03 End
+
+	memset(&client->pers, 0, sizeof(client->pers));
+
+	//K03 Begin
+	item = FindItem("Blaster");
+	client->pers.selected_item = ITEM_INDEX(item);
+	client->pers.inventory[ITEM_INDEX(item)] = 1;
+	client->pers.inventory[ITEM_INDEX(FindItem("Sword"))] = 1;
+	client->pers.inventory[ITEM_INDEX(FindItem("Power Screen"))] = 1;
+
+	client->pers.spectator = spectator;
+	client->pers.weapon = item;
+	client->pers.combat_changed = saved;//4.5
+	//K03 End
+
+	client->pers.health = 100;
+	client->pers.max_health = 100;
+
+	client->pers.max_bullets = 200;
+	client->pers.max_shells = 100;
+	client->pers.max_rockets = 50;
+	client->pers.max_grenades = 50;
+	client->pers.max_cells = 200;
+	client->pers.max_slugs = 50;
+
+	client->pers.connected = true;
+//	ClearScanner(client);
+}
+// end -JukS

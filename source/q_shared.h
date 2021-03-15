@@ -233,6 +233,7 @@ typedef enum
 multicast_t;
 
 
+
 /*
    ==============================================================
 
@@ -395,6 +396,12 @@ char *Q_strupr( char *s );
 void Q_strncpyz (char *dest, const char *src, size_t size );
 void Q_strncatz (char *dest, const char *src, size_t size );
 void Com_sprintf(char *dest, size_t size, const char *fmt, ...);
+#ifndef Q_strncpy
+void Q_strncpy(char* pszDest, const char* pszSrc, int nDestSize) {
+    strncpy(pszDest, pszSrc, nDestSize);
+    pszDest[nDestSize - 1] = '\0';
+}
+#endif
 
 //=============================================
 
@@ -1244,7 +1251,9 @@ temp_event_t;
 #define STAT_TEAM1_HEADER               30
 #define STAT_TEAM2_HEADER               31
 
-#define MAX_STATS                       32
+#define STAT_SPECTATOR			32 // For saving player info -JukS (15.03.2021)
+
+#define MAX_STATS                       33
 
 
 // dmflags->value flags
@@ -1426,3 +1435,8 @@ typedef struct
 player_state_t;
 
 #endif
+
+// for file_output.c -JukS (14.03.2021)
+char* CryptString(char* text, qboolean decrypt);
+int AveragePlayerLevel(void);
+// void OpenTalentUpgradeMenu(edict_t* ent, int lastline);				//upgrade your talents
