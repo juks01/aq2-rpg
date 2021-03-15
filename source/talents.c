@@ -222,6 +222,108 @@ void TalentUpgradeMenu_handler(edict_t *ent, int option)
 	}
 }
 
+/* Thread-safe wrapper for gi.TagMalloc */
+void* V_Malloc(size_t Size, int Tag)
+{
+	void* Memory;
+/*
+#if (!defined GDS_NOMULTITHREADING) && (!defined NO_GDS)
+	pthread_mutex_lock(&MemMutex_Malloc);
+#endif
+*/
+	Memory = gi.TagMalloc(Size, Tag);
+/*
+#if (!defined GDS_NOMULTITHREADING) && (!defined NO_GDS)
+	pthread_mutex_unlock(&MemMutex_Malloc);
+#endif
+*/
+	return Memory;
+}
+
+
+void setmenuhandler(edict_t* ent, void (*optionselected)(edict_t* ent, int option)) {
+	ent->client->menustorage.optionselected = optionselected;
+}
+
+void addlinetomenu(edict_t* ent, char* line, int option) {
+	size_t size;
+
+	if (ent->client->menustorage.menu_active) // checks to see if the menu is showing
+		return;
+	if (ent->client->menustorage.num_of_lines >= MAX_LINES) // checks to see if there is space
+		return;
+
+	size = strlen(line);
+	if (size > MENU_MAX_LINE_LEN)
+		gi.dprintf("In %s, line \"%s\" length (%i) exceeds %i characters.\n", __func__, line, size, MENU_MAX_LINE_LEN);
+
+	ent->client->menustorage.num_of_lines++; // adds to the number of lines that can be seen
+	ent->client->menustorage.messages[ent->client->menustorage.num_of_lines].msg = V_Malloc(MENU_MAX_LINE_LEN, TAG_GAME);
+	Q_strncpy(ent->client->menustorage.messages[ent->client->menustorage.num_of_lines].msg, line, MENU_MAX_LINE_LEN - 1);
+	ent->client->menustorage.messages[ent->client->menustorage.num_of_lines].option = option;
+}
+
+void showmenu(edict_t* ent)
+{
+	int		i, j;  // general purpose integer for temporary use :)
+	char	finalmenu[1024]; // where the control strings for the menu are assembled.
+	char	tmp[80]; // temporary storage strings
+	int		center;
+
+	//if (debuginfo->value)
+		gi.dprintf("DEBUG: showmenu()\n");
+	if ((ent->client->menustorage.num_of_lines < 1) || (ent->client->menustorage.num_of_lines > MAX_LINES))
+	{
+		gi.dprintf("WARNING: showmenu() called with %d lines\n", ent->client->menustorage.num_of_lines);
+		return;
+	}
+
+	// copy menu bg control strings to our final menu
+	Com_sprintf(finalmenu, sizeof finalmenu, "xv 32 yv 8 picn inventory ");
+	// get y coord of text based on the number of lines we want to create
+	// this keeps the text vertically centered on our screen
+	j = 24 + LINE_SPACING * (ceil((float)(20 - ent->client->menustorage.num_of_lines) / 2));
+	// cycle through all lines and add their control codes to our final menu
+	// nothing is actually displayed until the very end
+	for (i = 1; i < (ent->client->menustorage.num_of_lines + 1); i++)
+	{
+		// get x coord of screen based on the length of the string for
+		// text that should be centered
+		center = 216 / 2 - strlen(ent->client->menustorage.messages[i].msg) * 4 + 52;
+		if (ent->client->menustorage.messages[i].option == 0)							// print white text
+			Com_sprintf(tmp, sizeof tmp, "xv 52 yv %i string \"%s\" ", j, ent->client->menustorage.messages[i].msg);
+		else if (ent->client->menustorage.messages[i].option == MENU_GREEN_LEFT)		// print green text
+			Com_sprintf(tmp, sizeof tmp, "xv 52 yv %i string2 \"%s\" ", j, ent->client->menustorage.messages[i].msg);
+		else if (ent->client->menustorage.messages[i].option == MENU_GREEN_CENTERED)	// print centered green text
+			Com_sprintf(tmp, sizeof tmp, "xv %d yv %i string2 \"%s\" ", center, j, ent->client->menustorage.messages[i].msg);
+		else if (ent->client->menustorage.messages[i].option == MENU_WHITE_CENTERED)	// print centered white text
+			Com_sprintf(tmp, sizeof tmp, "xv %d yv %i string \"%s\" ", center, j, ent->client->menustorage.messages[i].msg);
+		else if (ent->client->menustorage.messages[i].option == MENU_GREEN_RIGHT) {		// print right-aligned green text
+			center = 216 - strlen(ent->client->menustorage.messages[i].msg) * 8 + 52;
+			Com_sprintf(tmp, sizeof tmp, "xv %d yv %i string2 \"%s\" ", center, j, ent->client->menustorage.messages[i].msg);
+		}
+		else if (i == ent->client->menustorage.currentline)
+			Com_sprintf(tmp, sizeof tmp, "xv 52 yv %i string2 \">> %s\" ", j, ent->client->menustorage.messages[i].msg);
+		else
+			Com_sprintf(tmp, sizeof tmp, "xv 52 yv %i string \"   %s\" ", j, ent->client->menustorage.messages[i].msg);
+		// add the control string to our final menu space
+		strcat(finalmenu, tmp);
+		j += LINE_SPACING;
+	}
+
+	// actually display the final menu
+	ent->client->menustorage.menu_active = true;
+	ent->client->menustorage.displaymsg = false;
+	ent->client->showinventory = false;
+	ent->client->showscores = true;
+	gi.WriteByte(svc_layout);
+	gi.WriteString(finalmenu);
+	gi.unicast(ent, true);
+}
+
+
+
+
 //Adds menu lines that describe the general use of the talent.
 int writeTalentDescription(edict_t *ent, int talentID)
 {

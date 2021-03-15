@@ -396,12 +396,7 @@ char *Q_strupr( char *s );
 void Q_strncpyz (char *dest, const char *src, size_t size );
 void Q_strncatz (char *dest, const char *src, size_t size );
 void Com_sprintf(char *dest, size_t size, const char *fmt, ...);
-#ifndef Q_strncpy
-void Q_strncpy(char* pszDest, const char* pszSrc, int nDestSize) {
-    strncpy(pszDest, pszSrc, nDestSize);
-    pszDest[nDestSize - 1] = '\0';
-}
-#endif
+void Q_strncpy(char* pszDest, const char* pszSrc, int nDestSize);
 
 //=============================================
 

@@ -2168,6 +2168,7 @@ char* CryptPassword(char* text);
 qboolean savePlayer(edict_t* ent);
 qboolean openPlayer(edict_t* ent);
 void createOpenPlayerThread(edict_t* ent);
+char* V_FormatFileName(char* name);
 //********** v_file_IO.c **********
 
 //************ player.c ************

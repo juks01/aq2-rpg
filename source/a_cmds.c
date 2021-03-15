@@ -134,6 +134,13 @@
 #include "g_local.h"
 #include <time.h>
 
+// I just drop this here... -JukS (15.03.2021)
+void Q_strncpy(char* pszDest, const char* pszSrc, int nDestSize) {
+	strncpy(pszDest, pszSrc, nDestSize);
+	pszDest[nDestSize - 1] = '\0';
+}
+// end -JukS
+
 /*----------------------------------------
  * SP_LaserSight
  *

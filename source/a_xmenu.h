@@ -27,6 +27,7 @@
 
 #define MAX_LINES				21	// Lines per menu.
 #define MENU_MAX_LINE_LEN		28	// Limit 27 chars in menu line.
+#define LINE_SPACING			8
 
 void addlinetomenu(edict_t* ent, char* line, int option);
 void clearmenu(edict_t* ent);

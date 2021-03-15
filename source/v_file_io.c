@@ -738,7 +738,7 @@ int FindRuneIndex(int index, edict_t *player) {
 //		That should be plenty for vrx	-doomie
 //***********************************************************************
 
-
+/*
 char* V_FormatFileName(char* name) {
 	char filename[64];
 	char buffer[64];
@@ -778,6 +778,7 @@ char* V_FormatFileName(char* name) {
 
 	return va("%s", filename);
 }
+*/
 
 //Called by savePlayer(). Don't call this directly.
 qboolean SavePlayer(edict_t *ent)

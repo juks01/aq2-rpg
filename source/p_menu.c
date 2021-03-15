@@ -1,7 +1,49 @@
 #include "g_local.h"
 
-void OpenDOMJoinMenu(edict_t* ent);
 void StartGame(edict_t* ent);
+
+void V_Free(void* mem)
+{
+/*
+#ifndef GDS_NOMULTITHREADING
+	pthread_mutex_lock(&MemMutex_Free);
+#endif
+*/
+	gi.TagFree(mem);
+/*
+#ifndef GDS_NOMULTITHREADING
+	pthread_mutex_unlock(&MemMutex_Free);
+#endif
+*/
+}
+
+void clearmenu(edict_t* ent) {
+	int		i = 0;
+
+	if (ent->client->menustorage.menu_active) // checks to see if the menu is showing
+		return;
+
+	for (i = 0; i < MAX_LINES; i++) {
+		ent->client->menustorage.messages[i].option = 0;
+		if (ent->client->menustorage.messages[i].msg != NULL) {
+			V_Free(ent->client->menustorage.messages[i].msg);
+			//GHz START
+			ent->client->menustorage.messages[i].msg = NULL;
+			//GHz END
+		}
+	}
+	//GHz START
+	// keep record of last known menu for multi-purpose menus that have more than one handler
+	if (ent->client->menustorage.optionselected)
+		ent->client->menustorage.oldmenuhandler = ent->client->menustorage.optionselected;
+	if (ent->client->menustorage.currentline)
+		ent->client->menustorage.oldline = ent->client->menustorage.currentline;
+	//GHz END
+	ent->client->menustorage.optionselected = NULL;
+	ent->client->menustorage.currentline = 0;
+	ent->client->menustorage.num_of_lines = 0;
+	ent->client->menustorage.menu_index = 0; // 3.45
+}
 
 void closemenu(edict_t* ent)
 {
